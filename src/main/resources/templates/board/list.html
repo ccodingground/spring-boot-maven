@@ -1,0 +1,93 @@
+<html class="no-js" lang=""
+  xmlns:th="http://www.thymeleaf.org" 
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{/layout/layout1}">
+  
+  
+  <div layout:fragment="content">
+  	<h1>List Page</h1>
+  	<div>
+  		<p>[[${result}]]</p>
+  		<div th:with="result=${pageMaker.result}" >
+  			<ul>
+  				<li>
+  					<ul class="align-row board-table board-title">
+  						<li>번호</li>
+  						<li>제목</li>
+  						<li>작성자</li>
+  						<li>작성일</li>
+  					</ul>
+  				</li>
+  				<li th:each="board:${result.content}">
+  					<ul class="align-row board-table board-list">
+  						<li>[[${board.bno}]]</li>
+  						<li>[[${board.title}]]</li>
+  						<li>[[${board.writer}]]</li>
+  						<li>[[${board.regdate}]]</li>
+  					</ul>
+  				</li>
+  			</ul>
+  		</div>
+  		<div>
+  			<select id="search-type">
+  				<option>선택</option>
+  				<option value="t" th:selected="${pageVO.type}=='t'">제목</option>
+  				<option value="c" th:selected="${pageVO.type}=='c'">내용</option>
+  				<option value="w" th:selected="${pageVO.type}=='w'">작성자</option>
+  			</select>
+  			<input type="text" id="search-keyword" th:value="${pageVO.keyword}"/>
+  			<button id="search-btn">검색</button>
+  		</div>
+  		<!-- paging -->
+  		<nav>
+  			<ul class="align-row board-pagging">
+  				<li th:if="${pageMaker.pervPage}">
+  					<a th:href="${pageMaker.pervPage.pageNumber}+1">이전</a>
+  				</li>
+  				<li th:each="p:${pageMaker.pageList}">
+  					<a th:href="${p.pageNumber}+1">[[${p.pageNumber}+1]]</a>
+  				</li>
+  				<li th:if="${pageMaker.nextPage}">
+  					<a th:href="${pageMaker.nextPage.pageNumber}+1">다음</a>
+  				</li>
+  			</ul>
+  		</nav>
+		<!-- page moving -->
+  		<form id="form1" th:action="@{list}" method="get">
+  			<input type="hidden" name="page" th:value="${pageMaker.currentPageNum}"/>
+  			<input type="hidden" name="size" th:value="${pageMaker.currentPage.pageSize}"/>
+  			<input type="hidden" name="type" th:value="${pageVO.type}"/>
+  			<input type="hidden" name="keyword" th:value="${pageVO.keyword}"/>
+  		</form>
+  	</div>
+  </div>
+  <th:block layout:fragment="script">
+  	<script th:inline="javascript">
+  		$(function(){
+  			var formTag=$("#form1");
+  			//페이지 버튼을 클릭했을때
+  			$(".board-pagging a").click(function(e){
+  				e.preventDefault();//URL변경을 막는다.
+  				//a태그의 href값을 읽어서 input [name='page']의 값변경
+  				formTag.find('[name="page"]').val($(this).attr('href'));
+  				formTag.submit();
+  			});
+  			
+  			//검색버튼을 클릭했을때
+  			$("#search-btn").click(function(e){
+  				//선택된 타입의 value
+  				var typeValue=$("#search-type").find(":selected").val();
+  				//입력된 키워드
+  				var keywordValue=$("#search-keyword").val();
+  				
+  				formTag.find('[name="type"]').val(typeValue);
+  				formTag.find('[name="keyword"]').val(keywordValue);
+  				
+  				formTag.find('[name="page"]').val("1");
+  				formTag.submit();
+  			});
+  		});
+  	</script>
+  </th:block>
+
+</html>
